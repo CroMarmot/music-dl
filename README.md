@@ -1,3 +1,20 @@
+# Ubuntu Quick Start
+
+```
+git clone https://github.com/CroMarmot/music-dl.git --depth=1
+cd music-dl
+python3 -m venv venv
+. venv/bin/activate
+pip3 install -r requirements.txt
+
+./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风 --dry
+./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风
+./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风 -s 'netease qq'
+./music-dl-smart csvdown csvdemo.csv --dry
+./music-dl-smart csvdown csvdemo.csv
+```
+
+
 # Music-dl: Listen to what you want
 
 <p align="center">

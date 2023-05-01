@@ -22,8 +22,8 @@ from .utils import colorize
 
 class BasicSong:
     """
-        Define the basic properties and methods of a song.
-        Such as title, name, singer etc.
+    Define the basic properties and methods of a song.
+    Such as title, name, singer etc.
     """
 
     def __init__(self):
@@ -48,7 +48,7 @@ class BasicSong:
         self.logger = logging.getLogger(__name__)
 
     def __repr__(self):
-        """ Abstract of the song """
+        """Abstract of the song"""
         source = colorize("%s" % self.source.upper(), self.source)
         return "%s #%s %s-%s-%s \n %s \n" % (
             source,
@@ -60,7 +60,7 @@ class BasicSong:
         )
 
     def __str__(self):
-        """ Song details """
+        """Song details"""
         source = colorize("%s" % self.source.upper(), self.source)
         return _(
             " -> Source: {source} #{id}\n"
@@ -89,17 +89,17 @@ class BasicSong:
 
     @property
     def available(self) -> bool:
-        """ Not available when url is none or size equal 0 """
+        """Not available when url is none or size equal 0"""
         return bool(self.song_url and self.size)
 
     @property
     def name(self) -> str:
-        """ Song file name """
+        """Song file name"""
         return "%s - %s.%s" % (self.singer, self.title, self.ext)
 
     @property
     def duration(self):
-        """ 持续时间 H:M:S """
+        """持续时间 H:M:S"""
         return self._duration
 
     @duration.setter
@@ -112,7 +112,7 @@ class BasicSong:
 
     @song_url.setter
     def song_url(self, url):
-        """ Set song url and update size. """
+        """Set song url and update size."""
         try:
             r = requests.get(
                 url,
@@ -133,7 +133,7 @@ class BasicSong:
 
     @property
     def row(self) -> list:
-        """ Song details in list form """
+        """Song details in list form"""
 
         def highlight(s, k):
             return s.replace(k, colorize(k, "xiami")).replace(
@@ -166,7 +166,6 @@ class BasicSong:
             self.source.upper(),
         ]
 
-
     @property
     def title(self):
         return self._title
@@ -186,7 +185,7 @@ class BasicSong:
         self._singer = value
 
     def _set_fullname(self):
-        """ Full name without suffix, to resolve file name conflicts"""
+        """Full name without suffix, to resolve file name conflicts"""
         outdir = config.get("outdir")
         outfile = os.path.abspath(os.path.join(outdir, self.name))
         if os.path.exists(outfile):
@@ -222,7 +221,7 @@ class BasicSong:
     def cover_fullname(self):
         return self._fullname + ".jpg"
 
-    def _download_file(self, url, outfile, stream=False):
+    def _download_file(self, url, outfile, stream=False) -> bool:
         """
             Helper function for download
         :param url:
@@ -232,7 +231,7 @@ class BasicSong:
         """
         if not url:
             self.logger.error("URL is empty.")
-            return
+            return False
         try:
             r = requests.get(
                 url,
@@ -258,6 +257,7 @@ class BasicSong:
                     outfile=colorize(outfile, "highlight")
                 )
             )
+            return True
         except Exception as e:
             click.echo("")
             self.logger.error(_("Download failed: ") + "\n")
@@ -267,8 +267,9 @@ class BasicSong:
             )
             if config.get("verbose"):
                 self.logger.error(e)
+            return False
 
-    def _save_lyrics_text(self):
+    def _save_lyrics_text(self) -> bool:
         with open(self.lyrics_fullname, "w", encoding="utf-8") as f:
             f.write(self.lyrics_text)
             click.echo(
@@ -276,31 +277,40 @@ class BasicSong:
                     outfile=colorize(self.lyrics_fullname, "highlight")
                 )
             )
+        return True
 
-    def download_song(self):
+    def download_song(self) -> bool:
         if self.song_url:
-            self._download_file(self.song_url, self.song_fullname, stream=True)
+            return self._download_file(self.song_url, self.song_fullname, stream=True)
+        return False
 
-    def download_lyrics(self):
+    def download_lyrics(self) -> bool:
         if self.lyrics_url:
-            self._download_file(self.lyrics_url, self.lyrics_fullname, stream=False)
+            return self._download_file(
+                self.lyrics_url, self.lyrics_fullname, stream=False
+            )
+        return False
 
-    def download_cover(self):
+    def download_cover(self) -> bool:
         if self.cover_url:
-            self._download_file(self.cover_url, self.cover_fullname, stream=False)
+            return self._download_file(
+                self.cover_url, self.cover_fullname, stream=False
+            )
+        return False
 
-    def download(self):
-        """ Main download function """
+    def download(self) -> bool:
+        """Main download function"""
         click.echo("===============================================================")
         if config.get("verbose"):
             click.echo(str(self))
         else:
             click.echo(" | ".join(self.row))
 
-        self.download_song()
+        ok = self.download_song()
         if config.get("lyrics"):
             self.download_lyrics()
         if config.get("cover"):
             self.download_cover()
 
         click.echo("===============================================================\n")
+        return ok

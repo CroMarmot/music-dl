@@ -29,7 +29,7 @@ class QQSong(BasicSong):
         super(QQSong, self).__init__()
         self.mid = ""
 
-    def download_lyrics(self):
+    def download_lyrics(self) -> bool:
         url = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
         params = {
             "songmid": self.mid,
@@ -50,12 +50,12 @@ class QQSong(BasicSong):
         )
         lyric = res_data.get("lyric", "")
         self.lyrics_text = base64.b64decode(lyric).decode("utf-8")
-        super(QQSong, self)._save_lyrics_text()
+        return super(QQSong, self)._save_lyrics_text()
 
-    def download_cover(self):
-        pass
+    def download_cover(self) -> bool:
+        return False
 
-    def download(self):
+    def download(self) -> bool:
         # 计算vkey
         guid = str(random.randrange(1000000000, 10000000000))
         params = {
@@ -94,11 +94,11 @@ class QQSong(BasicSong):
                     self.ext = rate[1]
                     self.rate = rate[2]
                     break
-        super(QQSong, self).download()
+        return super(QQSong, self).download()
 
 
 def qq_search(keyword) -> list:
-    """ 搜索音乐 """
+    """搜索音乐"""
     number = config.get("number") or 5
     params = {"w": keyword, "format": "json", "p": 1, "n": number}
 

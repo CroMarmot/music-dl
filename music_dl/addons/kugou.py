@@ -25,7 +25,7 @@ class KugouSong(BasicSong):
         super(KugouSong, self).__init__()
         self.hash = ""
 
-    def download_lyrics(self):
+    def download_lyrics(self) -> bool:
         url = f"http://krcs.kugou.com/search?ver=1&client=mobi&duration=&hash={self.hash}&album_audio_id="
         req = KugouApi.request(url, method="GET")
         id = req.get('candidates')[0].get('id')
@@ -38,9 +38,10 @@ class KugouSong(BasicSong):
         import base64
         self.lyrics_text = base64.b64decode(res_lrc.get('content')).decode("utf-8")
         if self.lyrics_text:
-            super(KugouSong, self)._save_lyrics_text()
+            return super(KugouSong, self)._save_lyrics_text()
+        return False
 
-    def download(self):
+    def download(self) -> bool:
         params = dict(cmd="playInfo", hash=self.hash)
         res_data = KugouApi.request(
             "http://m.kugou.com/app/i/getSongInfo.php", method="GET", data=params
@@ -53,7 +54,7 @@ class KugouSong(BasicSong):
         self.ext = res_data.get("extName", "mp3")
         self.cover_url = res_data.get("album_img", "").replace("{size}", "150")
 
-        super(KugouSong, self).download()
+        return super(KugouSong, self).download()
 
 
 def kugou_search(keyword) -> list:

@@ -8,3 +8,4 @@
 
 from .__version__ import __version__
 from .__main__ import main
+from .__main_smart__ import main_smart

@@ -78,7 +78,7 @@ class NeteaseSong(BasicSong):
     def __init__(self):
         super(NeteaseSong, self).__init__()
 
-    def download_lyrics(self):
+    def download_lyrics(self) -> bool:
         row_data = {"csrf_token": "", "id": self.id, "lv": -1, "tv": -1}
         data = NeteaseApi.encrypted_request(row_data)
 
@@ -91,9 +91,10 @@ class NeteaseSong(BasicSong):
         )
 
         if self.lyrics_text:
-            super(NeteaseSong, self)._save_lyrics_text()
+            return super(NeteaseSong, self)._save_lyrics_text()
+        return False
 
-    def download(self):
+    def download(self) -> bool:
         """ Download song from netease music """
         data = NeteaseApi.encrypted_request(dict(ids=[self.id], br=32000))
         res_data = NeteaseApi.request(
@@ -106,7 +107,7 @@ class NeteaseSong(BasicSong):
             self.song_url = res_data[0].get("url", "")
             self.rate = int(res_data[0].get("br", 0) / 1000)
 
-        super(NeteaseSong, self).download()
+        return super(NeteaseSong, self).download()
 
 
 def netease_search(keyword) -> list:

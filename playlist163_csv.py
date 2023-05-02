@@ -9,6 +9,7 @@
 #   python3 playlist163_csv.py 'https://music.163.com/#/playlist?id=8366993012' > result.csv
 
 import os
+import csv
 import sys
 import json
 import time
@@ -57,10 +58,13 @@ def playlist163_csv(url: str):
         print("\033[33m请输入合法ID!\033[0m", file=sys.stderr)
         return
 
-    print(",".join(["singer", "title", "source"]))
+    csvdata = [["singer", "title", "source"]]
     for o in data:
         # print(o['name'],o['artist'],o['url'],o['pic'],o['lrc'])
-        print(",".join([o["artist"], o["name"], ""]))
+        csvdata.append([o["artist"], o["name"], ""])
+
+    writer = csv.writer(sys.stdout) # 逗号分隔, 双引号包裹
+    writer.writerows(csvdata)
 
 
 playlist163_csv(sys.argv[1])

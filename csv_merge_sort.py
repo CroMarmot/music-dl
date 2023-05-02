@@ -33,10 +33,13 @@ def csv_merge_sort(file_list: List[str]) -> None:
                 else:
                     print(f"BAD LINE[{csvpath}]: ", row, file=sys.stderr)
     l = sorted(l)
-    print(",".join(headline))
+
+    csvdata = [headline]
     for i, row in enumerate(l):
         if i == 0 or row != l[i - 1]:
-            print(",".join(row))
+            csvdata.append(row)
+    writer = csv.writer(sys.stdout) # 逗号分隔, 双引号包裹
+    writer.writerows(csvdata)
 
 
 csv_merge_sort(sys.argv[1:])

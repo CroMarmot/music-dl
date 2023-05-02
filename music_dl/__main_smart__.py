@@ -76,6 +76,9 @@ def smart_down_fn(ms: MusicSource,
                   title: str,
                   source: str = "",
                   dry=False) -> Tuple[List[BasicSong], List[BasicSong]]:
+    """
+        返回 成功下载列表，完美匹配列表 
+    """
     # 多于 4 个精确匹配则 放弃
     MAX_MATCH = 4
 
@@ -107,8 +110,13 @@ def smart_down_fn(ms: MusicSource,
 
         success_list: List[BasicSong] = []
         for item in matched_list:
-            if item.download():
-                success_list.append(item)
+            try:
+                if item.download():
+                    success_list.append(item)
+            except Exception as e:
+                # don't end program
+                print(e, file=sys.stderr)
+
         return success_list, matched_list
 
 
@@ -194,9 +202,14 @@ def smart_csvdown(ctx, csvpath: str, dry: bool, outdir: str, source: str = ""):
                 print("BAD LINE: ", row)
 
     try:
-        ok_list = []
-        failed_list = []
+        ok_list = [CSVHEADLINE]
+        skip_list = [CSVHEADLINE]
+        failed_list = [CSVHEADLINE]
         for singer, title, o_source in l:  # 文件中的source优先级 大于 命令行中source
+            if os.path.exists(os.path.join(outdir, f'{singer} - {title}.mp3')):
+                skip_list.append([singer, title, o_source])
+                print(f"Skip {singer} - {title}")
+                continue
             success_list, matched_list = smart_down_fn(ms,
                                                        singer=singer,
                                                        title=title,
@@ -209,16 +222,19 @@ def smart_csvdown(ctx, csvpath: str, dry: bool, outdir: str, source: str = ""):
                 failed_list.append([singer, title, o_source])
             time.sleep(0.5)
         if not dry:
-            if len(ok_list):
+            if len(ok_list) > 1:
                 print("OK list:")
-                print(",".join(CSVHEADLINE))
-                for row in ok_list:
-                    print(",".join(row))
-            if len(failed_list):
+                writer = csv.writer(sys.stdout)  # 逗号分隔, 双引号包裹
+                writer.writerows(ok_list)
+
+            if len(skip_list) > 1:
+                print("SKIP list:")
+                writer = csv.writer(sys.stdout)  # 逗号分隔, 双引号包裹
+                writer.writerows(skip_list)
+            if len(failed_list) > 1:
                 print("Failed list:")
-                print(",".join(CSVHEADLINE))
-                for row in failed_list:
-                    print(",".join(row))
+                writer = csv.writer(sys.stdout)  # 逗号分隔, 双引号包裹
+                writer.writerows(failed_list)
     except (EOFError, KeyboardInterrupt):
         sys.exit(1)
 

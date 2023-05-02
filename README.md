@@ -3,15 +3,18 @@
 ```
 git clone https://github.com/CroMarmot/music-dl.git --depth=1
 cd music-dl
-python3 -m venv venv
-. venv/bin/activate
 pip3 install -r requirements.txt
 
+# 单曲下载
 ./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风 --dry
 ./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风
 ./music-dl-smart down 'G.E.M. 邓紫棋' 一路逆风 -s 'netease qq'
+# 获取网易云列表
+./playlist163_csv.py 'https://music.163.com/#/playlist?id=8366993012' > csvdemo.csv
+# 多源搜索 精确匹配和下载
 ./music-dl-smart csvdown csvdemo.csv --dry
 ./music-dl-smart csvdown csvdemo.csv
+./music-dl-smart csvdown csvdemo.csv -o /tmp/downdir
 ```
 
 
